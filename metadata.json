@@ -1,0 +1,8 @@
+{
+  "name": "Stithi Monograph - Urni Mukherjee",
+  "description": "Archival monograph and dark surrealist fine art portfolio by Urni Mukherjee, featuring fine-line stippling, anatomical studies, and direct collector acquisitions.",
+  "requestFramePermissions": [],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}

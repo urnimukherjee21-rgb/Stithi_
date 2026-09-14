@@ -1,0 +1,23 @@
+@import "tailwindcss";
+
+@layer base {
+  html, body {
+    margin: 0;
+    padding: 0;
+    background-color: #131313;
+    color: #e5e2e1;
+    font-family: 'Hanken Grotesk', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  }
+}
+
+.font-editorial {
+  font-family: 'Bodoni Moda', Georgia, serif;
+}
+
+.font-mono-archive {
+  font-family: 'Space Mono', monospace;
+}
+
+.font-body {
+  font-family: 'Hanken Grotesk', sans-serif;
+}
