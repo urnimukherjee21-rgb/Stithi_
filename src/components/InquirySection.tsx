@@ -1,5 +1,5 @@
 import { useState, useEffect, FormEvent } from 'react';
-import { Mail, Send, CheckCircle, Shield, ArrowUpRight } from 'lucide-react';
+import { Mail, Send, CheckCircle, Shield, ArrowUpRight, AlertTriangle, Copy, Check, ExternalLink } from 'lucide-react';
 import { ARTWORKS_DATA } from '../data/artworks';
 
 interface InquirySectionProps {
@@ -11,9 +11,9 @@ export default function InquirySection({ selectedArtworkTitle }: InquirySectionP
   const [email, setEmail] = useState('');
   const [artwork, setArtwork] = useState('General Monograph Inquiry');
   const [message, setMessage] = useState('');
-  const [status, setStatus] = useState<'idle' | 'submitting' | 'success' | 'fallback' | 'error'>('idle');
+  const [status, setStatus] = useState<'idle' | 'submitting' | 'success' | 'direct_ready' | 'fallback'>('idle');
   const [statusMessage, setStatusMessage] = useState('');
-  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  const [copied, setCopied] = useState(false);
 
   useEffect(() => {
     if (selectedArtworkTitle) {
@@ -27,17 +27,40 @@ export default function InquirySection({ selectedArtworkTitle }: InquirySectionP
     }
   }, [selectedArtworkTitle]);
 
-  const generateMailtoUrl = () => {
-    const subject = encodeURIComponent(`Artwork Inquiry: ${artwork}`);
-    const body = encodeURIComponent(
-      `Urni Mukherjee Fine Art Studio Acquisition Dispatch\n\n` +
-      `Collector Name: ${name || 'Collector'}\n` +
+  const getDossierText = () => {
+    return (
+      `Stithi Monograph Acquisition Dispatch\n` +
+      `----------------------------------------\n` +
+      `Artist Contact: urnimukherjee21@gmail.com\n` +
+      `Collector Name: ${name || 'Private Collector'}\n` +
       `Collector Email: ${email || 'Not specified'}\n` +
-      `Plate / Work: ${artwork}\n\n` +
-      `Collector Note & Courier Destination:\n${message || 'Please provide information on availability and acquisition terms.'}\n\n` +
+      `Selected Plate: ${artwork}\n\n` +
+      `Collector Note & Courier Destination:\n` +
+      `${message || 'Inquiring regarding current availability, archival framing, and acquisition terms.'}\n\n` +
       `Dispatched via Stithi Monograph Portfolio.`
     );
+  };
+
+  const generateGmailUrl = () => {
+    const subject = encodeURIComponent(`[Stithi Acquisition] Inquiry: ${artwork} — ${name || 'Collector'}`);
+    const body = encodeURIComponent(getDossierText());
+    return `https://mail.google.com/mail/?view=cm&fs=1&to=urnimukherjee21@gmail.com&su=${subject}&body=${body}`;
+  };
+
+  const generateMailtoUrl = () => {
+    const subject = encodeURIComponent(`[Stithi Acquisition] Inquiry: ${artwork} — ${name || 'Collector'}`);
+    const body = encodeURIComponent(getDossierText());
     return `mailto:urnimukherjee21@gmail.com?subject=${subject}&body=${body}`;
+  };
+
+  const handleCopyDossier = async () => {
+    try {
+      await navigator.clipboard.writeText(getDossierText());
+      setCopied(true);
+      setTimeout(() => setCopied(false), 3000);
+    } catch {
+      // Fallback
+    }
   };
 
   const handleManualMailClient = () => {
@@ -47,8 +70,7 @@ export default function InquirySection({ selectedArtworkTitle }: InquirySectionP
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     setStatus('submitting');
-    setStatusMessage("Transmitting acquisition inquiry via studio Nodemailer service...");
-    setPreviewUrl(null);
+    setStatusMessage("Transmitting acquisition dossier to urnimukherjee21@gmail.com...");
 
     try {
       const response = await fetch("/api/inquire", {
@@ -67,22 +89,30 @@ export default function InquirySection({ selectedArtworkTitle }: InquirySectionP
 
       const data = await response.json();
 
-      if (!response.ok || !data.success) {
-        throw new Error(data.error || "Nodemailer dispatch returned an unexpected status.");
+      if (data.success && data.method === 'smtp') {
+        setStatus('success');
+        setStatusMessage(`Inquiry dispatched successfully via Nodemailer SMTP to urnimukherjee21@gmail.com. Urni Mukherjee's studio will reply within 48 curatorial hours.`);
+        setName('');
+        setEmail('');
+        setMessage('');
+        return;
       }
 
-      setStatus('success');
-      setStatusMessage(`Inquiry dispatched successfully via Nodemailer to Urni Mukherjee's studio (urnimukherjee21@gmail.com). You will receive a direct reply within 48 curatorial hours.`);
-      if (data.previewUrl) {
-        setPreviewUrl(data.previewUrl);
-      }
-      setName('');
-      setEmail('');
-      setMessage('');
-    } catch (err: unknown) {
-      const errMsg = err instanceof Error ? err.message : 'Transmission error';
-      setStatus('fallback');
-      setStatusMessage(`The studio server recorded your request. Click below to confirm transmission in your local email client or dispatch directly: ${errMsg}`);
+      // If background SMTP is not active or awaiting activation, trigger direct Compose tab
+      const gmailUrl = generateGmailUrl();
+      const opened = window.open(gmailUrl, '_blank');
+
+      setStatus('direct_ready');
+      setStatusMessage(
+        opened 
+          ? `Inquiry prepared for urnimukherjee21@gmail.com. We have opened your Web Gmail compose tab with the dossier filled in. Simply click "Send" in Gmail to deliver directly into Urni's inbox!`
+          : `Inquiry prepared for urnimukherjee21@gmail.com. Click "Open in Web Gmail" below to send with one click, or use your default email app.`
+      );
+    } catch {
+      // Fallback opens Gmail draft
+      window.open(generateGmailUrl(), '_blank');
+      setStatus('direct_ready');
+      setStatusMessage(`Inquiry dossier prepared for urnimukherjee21@gmail.com. Click "Open in Web Gmail" or "Launch Email App" below to complete dispatch.`);
     }
   };
 
@@ -124,6 +154,37 @@ export default function InquirySection({ selectedArtworkTitle }: InquirySectionP
             <span className="text-xs text-[#aa8984] font-body">
               Inquiries generally receive personalized artist replies within 48 curatorial hours.
             </span>
+          </div>
+
+          <div className="p-4 bg-[#181818] border border-[#5a403c]/30 flex flex-col gap-2">
+            <div className="flex items-center gap-2 text-xs font-mono-archive text-[#ffb4a8] uppercase">
+              <Mail className="w-3.5 h-3.5" />
+              <span>Direct 1-Click Compose</span>
+            </div>
+            <p className="text-[11px] text-[#aa8984]">
+              For 100% guaranteed delivery from your personal email account without third-party delay:
+            </p>
+            <div className="pt-1 flex flex-wrap gap-2">
+              <a
+                id="instant-gmail-btn"
+                href={generateGmailUrl()}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="px-3 py-1.5 bg-[#8b0000] hover:bg-[#ac012c] text-[#ffdad4] text-xs font-mono-archive uppercase tracking-wider flex items-center gap-1.5 transition-colors cursor-pointer"
+              >
+                <span>Open in Web Gmail</span>
+                <ExternalLink className="w-3 h-3" />
+              </a>
+
+              <a
+                id="instant-mail-app-btn"
+                href={generateMailtoUrl()}
+                className="px-3 py-1.5 bg-[#2a2a2a] hover:bg-[#353534] border border-[#5a403c]/40 text-[#e5e2e1] text-xs font-mono-archive uppercase tracking-wider flex items-center gap-1.5 transition-colors"
+              >
+                <span>Launch Email App</span>
+                <ArrowUpRight className="w-3 h-3" />
+              </a>
+            </div>
           </div>
 
           <div className="flex items-center gap-2.5 text-[#aa8984] font-mono-archive text-[11px]">
@@ -225,59 +286,141 @@ export default function InquirySection({ selectedArtworkTitle }: InquirySectionP
                 className="px-8 py-4 bg-[#8b0000] hover:bg-[#ac012c] disabled:opacity-50 text-[#ffdad4] font-mono-archive text-xs uppercase tracking-widest transition-all duration-300 flex items-center justify-center gap-3 cursor-pointer shadow-md"
               >
                 <span>
-                  {status === 'submitting' ? 'Dispatching...' : 'Send Inquiry to Urni Mukherjee'}
+                  {status === 'submitting' ? 'Forwarding...' : 'Send Inquiry to Urni Mukherjee'}
                 </span>
                 <Send className="w-3.5 h-3.5" />
               </button>
 
               <span className="font-mono-archive text-[10px] text-[#aa8984] text-center sm:text-right">
-                Protocol: Direct Email Dispatch
+                Destination: urnimukherjee21@gmail.com
               </span>
             </div>
 
+            {/* Direct Quick Actions Bar */}
+            <div className="pt-3 border-t border-[#5a403c]/30 flex flex-wrap items-center justify-between gap-3 text-xs font-mono-archive">
+              <span className="text-[#aa8984] text-[11px]">
+                Or send directly from your account:
+              </span>
+
+              <div className="flex flex-wrap items-center gap-2">
+                <a
+                  id="direct-gmail-link"
+                  href={generateGmailUrl()}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="px-2.5 py-1.5 bg-[#252525] hover:bg-[#333] border border-[#5a403c]/40 text-[#ffb4a8] text-[11px] flex items-center gap-1.5 transition-colors"
+                  title="Open pre-filled draft directly in Web Gmail"
+                >
+                  <Mail className="w-3 h-3 text-[#ffb4a8]" />
+                  <span>Open in Web Gmail</span>
+                  <ExternalLink className="w-3 h-3" />
+                </a>
+
+                <a
+                  id="direct-client-link"
+                  href={generateMailtoUrl()}
+                  className="px-2.5 py-1.5 bg-[#252525] hover:bg-[#333] border border-[#5a403c]/40 text-[#e5e2e1] text-[11px] flex items-center gap-1.5 transition-colors"
+                  title="Open in default desktop or mobile mail program"
+                >
+                  <span>Email App</span>
+                  <ArrowUpRight className="w-3 h-3" />
+                </a>
+
+                <button
+                  type="button"
+                  onClick={handleCopyDossier}
+                  className="px-2.5 py-1.5 bg-[#252525] hover:bg-[#333] border border-[#5a403c]/40 text-[#aa8984] hover:text-[#e5e2e1] text-[11px] flex items-center gap-1.5 transition-colors cursor-pointer"
+                  title="Copy formatted dossier to clipboard"
+                >
+                  {copied ? <Check className="w-3 h-3 text-emerald-400" /> : <Copy className="w-3 h-3" />}
+                  <span>{copied ? 'Copied!' : 'Copy Note'}</span>
+                </button>
+              </div>
+            </div>
+
+            {/* Status Feedback Banners */}
             {statusMessage && (
               <div 
                 id="inquiry-feedback-banner"
-                className={`p-4 border text-xs font-mono-archive flex flex-col gap-2.5 ${
+                className={`p-4 border text-xs font-mono-archive flex flex-col gap-3 ${
                   status === 'success' 
                     ? 'bg-emerald-950/40 border-emerald-700/60 text-emerald-200' 
+                    : status === 'direct_ready'
+                    ? 'bg-[#251817] border-[#8b0000] text-[#ffdad4]'
                     : 'bg-[#201f1f] border-[#5a403c]/50 text-[#ffb4a8]'
                 }`}
               >
-                <div className="flex items-start gap-2">
-                  {status === 'success' && <CheckCircle className="w-4 h-4 shrink-0 text-emerald-400 mt-0.5" />}
-                  <span>{statusMessage}</span>
+                <div className="flex items-start gap-2.5">
+                  {status === 'success' ? (
+                    <CheckCircle className="w-4 h-4 shrink-0 text-emerald-400 mt-0.5" />
+                  ) : (
+                    <Mail className="w-4 h-4 shrink-0 text-[#ffb4a8] mt-0.5" />
+                  )}
+                  <div className="flex flex-col gap-1 leading-relaxed">
+                    <span className="font-semibold">
+                      {status === 'success' ? 'Dispatched via Nodemailer:' : 'Acquisition Dispatch Prepared:'}
+                    </span>
+                    <span>{statusMessage}</span>
+                  </div>
                 </div>
 
-                {previewUrl && (
-                  <div className="pt-1">
-                    <a
-                      href={previewUrl}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-[#2a2a2a] hover:bg-[#353534] border border-[#5a403c]/50 text-[#ffb4a8] text-[11px] underline"
-                    >
-                      <span>View Nodemailer Archival Transmission Log</span>
-                      <ArrowUpRight className="w-3.5 h-3.5" />
-                    </a>
+                {status === 'direct_ready' && (
+                  <div className="p-3 bg-[#171110] border border-[#5a403c]/40 flex flex-col gap-2.5 mt-1">
+                    <div className="text-[11px] text-[#e3beb8] flex items-center gap-2">
+                      <span className="w-1.5 h-1.5 bg-[#ffb4a8] rounded-full animate-pulse"></span>
+                      <span>Recipient: <strong>urnimukherjee21@gmail.com</strong></span>
+                    </div>
+
+                    <div className="flex flex-wrap items-center gap-2 pt-1">
+                      <a
+                        id="modal-direct-gmail-btn"
+                        href={generateGmailUrl()}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="px-4 py-2 bg-[#8b0000] hover:bg-[#ac012c] text-[#ffdad4] text-xs font-mono-archive uppercase tracking-wider flex items-center gap-2 cursor-pointer shadow-md"
+                      >
+                        <Mail className="w-3.5 h-3.5" />
+                        <span>Send Now in Web Gmail</span>
+                        <ExternalLink className="w-3 h-3" />
+                      </a>
+
+                      <a
+                        href={generateMailtoUrl()}
+                        className="px-3.5 py-2 bg-[#2a2a2a] hover:bg-[#353534] border border-[#5a403c]/50 text-[#e5e2e1] text-xs font-mono-archive uppercase tracking-wider flex items-center gap-1.5"
+                      >
+                        <span>Launch Mail App</span>
+                        <ArrowUpRight className="w-3 h-3" />
+                      </a>
+
+                      <button
+                        type="button"
+                        onClick={handleCopyDossier}
+                        className="px-3.5 py-2 bg-[#202020] hover:bg-[#2c2c2c] border border-[#5a403c]/40 text-[#aa8984] hover:text-[#e5e2e1] text-xs font-mono-archive uppercase tracking-wider flex items-center gap-1.5 cursor-pointer"
+                      >
+                        {copied ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
+                        <span>{copied ? 'Copied' : 'Copy Dossier'}</span>
+                      </button>
+                    </div>
                   </div>
                 )}
 
                 {status === 'fallback' && (
                   <div className="pt-2 flex flex-wrap gap-2">
-                    <button
-                      type="button"
-                      onClick={handleManualMailClient}
+                    <a
+                      href={generateGmailUrl()}
+                      target="_blank"
+                      rel="noopener noreferrer"
                       className="px-4 py-2 bg-[#8b0000] hover:bg-[#ac012c] text-[#ffdad4] text-[11px] uppercase tracking-wider flex items-center gap-1.5 cursor-pointer"
                     >
                       <Mail className="w-3.5 h-3.5" />
-                      <span>Launch In Your Email App</span>
-                    </button>
+                      <span>Send with 1-Click in Web Gmail</span>
+                      <ExternalLink className="w-3 h-3" />
+                    </a>
                     <a
-                      href="mailto:urnimukherjee21@gmail.com"
+                      href={generateMailtoUrl()}
                       className="px-4 py-2 bg-[#2a2a2a] hover:bg-[#353534] border border-[#5a403c]/50 text-[#e5e2e1] text-[11px] uppercase tracking-wider flex items-center gap-1.5"
                     >
-                      <span>Write Direct to urnimukherjee21@gmail.com</span>
+                      <span>Open in Mail App</span>
                     </a>
                   </div>
                 )}

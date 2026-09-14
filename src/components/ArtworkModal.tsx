@@ -164,8 +164,8 @@ export default function ArtworkModal({ artwork, onClose, onInquire }: ArtworkMod
 
             <div
               style={{
-                transform: `translate(${panOffset.x}px, ${panOffset.y}px) scale(${zoomLevel})`,
-                transition: isDragging ? 'none' : 'transform 0.25s cubic-bezier(0.16, 1, 0.3, 1)',
+                transform: `translate(${panOffset.x}px, ${panOffset.y}px)`,
+                transition: isDragging ? 'none' : 'transform 0.2s cubic-bezier(0.16, 1, 0.3, 1)',
                 transformOrigin: 'center center',
               }}
               className="flex items-center justify-center max-h-full max-w-full"
@@ -175,9 +175,13 @@ export default function ArtworkModal({ artwork, onClose, onInquire }: ArtworkMod
                 src={rawMasterUrl}
                 alt={artwork.title}
                 onLoad={() => setImageLoaded(true)}
-                className="max-h-[60vh] w-auto max-w-full object-contain select-none shadow-2xl filter contrast-[1.02]"
+                className="select-none shadow-2xl filter contrast-[1.02] transition-[width,height] duration-200"
                 style={{
                   imageRendering: '-webkit-optimize-contrast',
+                  width: zoomLevel === 1 ? 'auto' : `${Math.round(zoomLevel * 100)}%`,
+                  maxWidth: zoomLevel === 1 ? '100%' : 'none',
+                  maxHeight: zoomLevel === 1 ? '60vh' : 'none',
+                  objectFit: 'contain',
                 }}
                 referrerPolicy="no-referrer"
               />
@@ -230,15 +234,64 @@ export default function ArtworkModal({ artwork, onClose, onInquire }: ArtworkMod
               )}
             </div>
 
-            <div className="flex items-center gap-2">
+            <div className="flex flex-wrap items-center gap-2">
               <button
                 type="button"
-                onClick={() => setZoomLevel(zoomLevel === 1 ? 2 : 1)}
-                className="px-2.5 py-1.5 bg-[#201f1f] hover:bg-[#2c2b2b] border border-[#5a403c]/40 text-[10px] font-mono-archive text-[#e5e2e1] hover:text-[#ffb4a8] transition-colors flex items-center gap-1.5 cursor-pointer"
+                onClick={() => {
+                  setZoomLevel(1);
+                  setPanOffset({ x: 0, y: 0 });
+                }}
+                className={`px-2 py-1 text-[10px] font-mono-archive border transition-colors cursor-pointer ${
+                  zoomLevel === 1 
+                    ? 'bg-[#8b0000] border-[#8b0000] text-[#ffdad4]' 
+                    : 'bg-[#1a1a1a] border-[#5a403c]/40 text-[#aa8984] hover:text-[#e5e2e1]'
+                }`}
               >
-                <Maximize2 className="w-3 h-3" />
-                <span>{zoomLevel === 1 ? 'Detail Magnifier' : 'Fit Frame'}</span>
+                Fit
               </button>
+
+              <button
+                type="button"
+                onClick={() => {
+                  setZoomLevel(1.75);
+                  setPanOffset({ x: 0, y: 0 });
+                }}
+                className={`px-2 py-1 text-[10px] font-mono-archive border transition-colors cursor-pointer ${
+                  zoomLevel === 1.75 
+                    ? 'bg-[#8b0000] border-[#8b0000] text-[#ffdad4]' 
+                    : 'bg-[#1a1a1a] border-[#5a403c]/40 text-[#aa8984] hover:text-[#e5e2e1]'
+                }`}
+                title="View at high-DPI stippling scale"
+              >
+                4K Master (175%)
+              </button>
+
+              <button
+                type="button"
+                onClick={() => {
+                  setZoomLevel(3);
+                  setPanOffset({ x: 0, y: 0 });
+                }}
+                className={`px-2 py-1 text-[10px] font-mono-archive border transition-colors cursor-pointer ${
+                  zoomLevel === 3 
+                    ? 'bg-[#8b0000] border-[#8b0000] text-[#ffdad4]' 
+                    : 'bg-[#1a1a1a] border-[#5a403c]/40 text-[#aa8984] hover:text-[#e5e2e1]'
+                }`}
+                title="Microscopic 0.05mm pen stipple inspection"
+              >
+                Deep Stipple (300%)
+              </button>
+
+              <a
+                href={rawMasterUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="px-2 py-1 bg-[#242424] hover:bg-[#333] border border-[#5a403c]/40 text-[10px] font-mono-archive text-[#ffb4a8] flex items-center gap-1 transition-colors"
+                title="Open 2604x3964 master image directly in high-res tab"
+              >
+                <span>Full 4K Tab</span>
+                <ExternalLink className="w-3 h-3" />
+              </a>
             </div>
           </div>
         </div>
