@@ -20,7 +20,11 @@ export default function InquirySection({ selectedArtworkTitle }: InquirySectionP
       // Find matching option
       const found = ARTWORKS_DATA.find(a => a.title.toLowerCase() === selectedArtworkTitle.toLowerCase());
       if (found) {
-        setArtwork(`${found.plateNumber.split(' // ')[0]}: ${found.title}`);
+        setArtwork(
+          found.isSold 
+            ? `${found.plateNumber.split(' // ')[0]}: ${found.title} [SOLD OUT]`
+            : `${found.plateNumber.split(' // ')[0]}: ${found.title}`
+        );
       } else {
         setArtwork(selectedArtworkTitle);
       }
@@ -253,12 +257,34 @@ export default function InquirySection({ selectedArtworkTitle }: InquirySectionP
               >
                 <option value="General Monograph Inquiry">General Monograph Inquiry</option>
                 {ARTWORKS_DATA.map((art) => (
-                  <option key={art.id} value={`${art.plateNumber.split(' // ')[0]}: ${art.title}`}>
-                    {art.plateNumber.split(' // ')[0]}: {art.title} ({art.discipline})
+                  <option 
+                    key={art.id} 
+                    value={
+                      art.isSold 
+                        ? `${art.plateNumber.split(' // ')[0]}: ${art.title} [SOLD OUT]` 
+                        : `${art.plateNumber.split(' // ')[0]}: ${art.title}`
+                    }
+                  >
+                    {art.plateNumber.split(' // ')[0]}: {art.title} {art.isSold ? '— [SOLD OUT / IN PRIVATE COLLECTION]' : `(${art.discipline})`}
                   </option>
                 ))}
                 <option value="Bespoke Studio Commission">Bespoke Studio Commission</option>
               </select>
+
+              {/* Notice if sold work is selected */}
+              {(artwork.includes('PLATE 02') || artwork.includes('Turbulent Orbit') || artwork.includes('SOLD OUT')) && (
+                <div className="p-3.5 bg-[#251312] border border-[#8b0000] text-xs font-mono-archive text-[#ffdad4] flex items-start gap-2.5 mt-1">
+                  <AlertTriangle className="w-4 h-4 text-[#ffb4a8] shrink-0 mt-0.5" />
+                  <div className="flex flex-col gap-1">
+                    <span className="font-semibold uppercase tracking-wider text-[#ffb4a8]">
+                      Notice: Plate 02 (Turbulent Orbit) is Sold Out
+                    </span>
+                    <span className="text-[#e3beb8] font-body text-xs leading-relaxed">
+                      This original monograph has already been acquired by a customer and is <strong>no longer available to buy</strong>. You may use this form to commission a bespoke sibling artwork inspired by this motif, or inquire about forthcoming plates in Urni Mukherjee's collection.
+                    </span>
+                  </div>
+                </div>
+              )}
             </div>
 
             <div className="flex flex-col gap-1.5">

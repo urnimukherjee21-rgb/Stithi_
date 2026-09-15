@@ -309,13 +309,33 @@ export default function ArtworkModal({ artwork, onClose, onInquire }: ArtworkMod
             </div>
 
             <div>
-              <h3 className="font-editorial text-2xl sm:text-3xl text-[#e5e2e1]">
-                {artwork.title}
-              </h3>
+              <div className="flex items-center gap-2">
+                <h3 className="font-editorial text-2xl sm:text-3xl text-[#e5e2e1]">
+                  {artwork.title}
+                </h3>
+                {artwork.isSold && (
+                  <span className="font-mono-archive text-[10px] bg-[#8b0000] text-[#ffdad4] px-2 py-0.5 uppercase tracking-wider font-semibold">
+                    Sold Out
+                  </span>
+                )}
+              </div>
               <p className="font-editorial text-sm sm:text-base text-[#ffb4a8]/90 italic font-light mt-1">
                 {artwork.caption}
               </p>
             </div>
+
+            {/* Sold Out Notice Banner */}
+            {artwork.isSold && (
+              <div className="p-3.5 bg-[#251212] border border-[#8b0000] flex flex-col gap-1.5 shadow-md">
+                <div className="flex items-center gap-2 font-mono-archive text-xs font-semibold text-[#ffdad4] uppercase tracking-wider">
+                  <span className="w-2 h-2 rounded-full bg-[#ffb4a8] animate-pulse" />
+                  <span>Status: Sold Out // In Private Collection</span>
+                </div>
+                <p className="text-xs text-[#e3beb8] font-body leading-relaxed">
+                  This original master plate was acquired by a customer and is <strong>no longer available for purchase</strong>. The high-resolution file remains documented here for curatorial, archival, and retrospective study.
+                </p>
+              </div>
+            )}
 
             <div className="py-2 flex flex-col gap-1.5 border-t border-b border-[#5a403c]/20">
               <span className="font-mono-archive text-[10px] text-[#aa8984] uppercase tracking-widest">
@@ -345,15 +365,35 @@ export default function ArtworkModal({ artwork, onClose, onInquire }: ArtworkMod
 
           {/* Action Buttons */}
           <div className="pt-6 sm:pt-8 flex flex-col gap-2.5 border-t border-[#5a403c]/30 mt-6">
-            <button
-              id="modal-inquire-direct-btn"
-              onClick={() => onInquire(artwork)}
-              className="w-full py-3.5 px-4 bg-[#8b0000] hover:bg-[#ac012c] text-[#ffdad4] font-mono-archive text-xs uppercase tracking-widest transition-colors flex items-center justify-center gap-2 cursor-pointer shadow-md"
-            >
-              <Mail className="w-4 h-4" />
-              <span>Inquire to Acquire This Plate</span>
-              <ArrowRight className="w-3.5 h-3.5" />
-            </button>
+            {artwork.isSold ? (
+              <div className="flex flex-col gap-2.5">
+                <div
+                  id="modal-sold-out-status-btn"
+                  className="w-full py-3.5 px-4 bg-[#201515] border border-[#8b0000] text-[#ffdad4] font-mono-archive text-xs uppercase tracking-widest text-center flex items-center justify-center gap-2 select-none shadow-sm"
+                >
+                  <span className="w-2 h-2 rounded-full bg-[#ffb4a8]" />
+                  <span>Sold Out — Not Available to Buy</span>
+                </div>
+                <button
+                  id="modal-inquire-commission-btn"
+                  onClick={() => onInquire(artwork)}
+                  className="w-full py-2.5 px-4 bg-[#282727] hover:bg-[#343232] border border-[#5a403c]/50 text-[#e5e2e1] hover:text-[#ffdad4] font-mono-archive text-[11px] uppercase tracking-wider transition-colors flex items-center justify-center gap-2 cursor-pointer"
+                >
+                  <Mail className="w-3.5 h-3.5 text-[#ffb4a8]" />
+                  <span>Inquire for Similar Commission / Future Series</span>
+                </button>
+              </div>
+            ) : (
+              <button
+                id="modal-inquire-direct-btn"
+                onClick={() => onInquire(artwork)}
+                className="w-full py-3.5 px-4 bg-[#8b0000] hover:bg-[#ac012c] text-[#ffdad4] font-mono-archive text-xs uppercase tracking-widest transition-colors flex items-center justify-center gap-2 cursor-pointer shadow-md"
+              >
+                <Mail className="w-4 h-4" />
+                <span>Inquire to Acquire This Plate</span>
+                <ArrowRight className="w-3.5 h-3.5" />
+              </button>
+            )}
 
             <button
               id="modal-close-secondary-btn"

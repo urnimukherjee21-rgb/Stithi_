@@ -13,6 +13,8 @@ export interface Artwork {
   image: string;
   rawImage?: string;
   isDiptych?: boolean;
+  isSold?: boolean;
+  availabilityNotice?: string;
 }
 
 export interface InquiryFormData {

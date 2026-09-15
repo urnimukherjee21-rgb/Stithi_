@@ -21,11 +21,13 @@ export const ARTWORKS_DATA: Artwork[] = [
     title: "Turbulent Orbit",
     discipline: "Obsessive Ballpoint",
     category: "psychological",
-    caption: "Chaotic ballpoint vortex circling the quiet core of emotional frenzy.",
-    story: "Drawn in continuous obsessive strokes, capturing the cyclical spiral of overwhelming thoughts and centrifugal calm. The paper bears the tactile indentation of physical exertion, embodying nervous equilibrium.",
+    caption: "Chaotic ballpoint vortex circling the quiet core of emotional frenzy. [SOLD OUT]",
+    story: "Drawn in continuous obsessive strokes, capturing the cyclical spiral of overwhelming thoughts and centrifugal calm. The paper bears the tactile indentation of physical exertion, embodying nervous equilibrium. Note: This master original has been acquired by a private collector and is permanently archived in private collection.",
     medium: "Ballpoint Ink, Layered Cross-Hatching on Archival Parchment",
     image: "https://lh3.googleusercontent.com/aida-public/AB6AXuDnQUXYgMGVjRG6-teMxhrABG3QuFRi73-eMf-FsT-GsjnjcK9pG1j8tnsS7arxJmSPhVGM8XhzRaw-dxSunLKcWEndUmSUg7hsim4nGEsrFmm5OPOy2w58nhu9XKt_HAWvTZPYMp6MowqcQ-fLx-XhExboBhoNEBgWm_-mU_b8QX4FSbamuPIgNp0NVeyiOjOmX4byioiFW-sl0hzCf6z9iLyd_Z6R2tld_dapLwCYeibTBmIl1F3Wz10jtaXoMgTWtA=s0",
-    rawImage: "https://lh3.googleusercontent.com/aida-public/AB6AXuDnQUXYgMGVjRG6-teMxhrABG3QuFRi73-eMf-FsT-GsjnjcK9pG1j8tnsS7arxJmSPhVGM8XhzRaw-dxSunLKcWEndUmSUg7hsim4nGEsrFmm5OPOy2w58nhu9XKt_HAWvTZPYMp6MowqcQ-fLx-XhExboBhoNEBgWm_-mU_b8QX4FSbamuPIgNp0NVeyiOjOmX4byioiFW-sl0hzCf6z9iLyd_Z6R2tld_dapLwCYeibTBmIl1F3Wz10jtaXoMgTWtA=s0"
+    rawImage: "https://lh3.googleusercontent.com/aida-public/AB6AXuDnQUXYgMGVjRG6-teMxhrABG3QuFRi73-eMf-FsT-GsjnjcK9pG1j8tnsS7arxJmSPhVGM8XhzRaw-dxSunLKcWEndUmSUg7hsim4nGEsrFmm5OPOy2w58nhu9XKt_HAWvTZPYMp6MowqcQ-fLx-XhExboBhoNEBgWm_-mU_b8QX4FSbamuPIgNp0NVeyiOjOmX4byioiFW-sl0hzCf6z9iLyd_Z6R2tld_dapLwCYeibTBmIl1F3Wz10jtaXoMgTWtA=s0",
+    isSold: true,
+    availabilityNotice: "Acquired by private collector. This original plate is sold out and no longer available for purchase."
   },
   {
     id: 2,

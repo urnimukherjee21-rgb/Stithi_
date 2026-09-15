@@ -425,10 +425,17 @@ export default function App() {
                     MASTER RAW RES
                   </div>
 
+                  {/* Sold Out Badge */}
+                  {art.isSold && (
+                    <div className="absolute top-2 right-2 bg-[#8b0000] text-[#ffdad4] border border-[#ffb4a8]/50 px-2 py-0.5 text-[9px] font-mono-archive tracking-wider font-semibold uppercase shadow-lg">
+                      SOLD OUT
+                    </div>
+                  )}
+
                   {/* Hover Overlay */}
                   <div className="absolute inset-0 bg-gradient-to-t from-[#0e0e0e]/95 via-[#0e0e0e]/30 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end justify-between p-4">
                     <span className="font-mono-archive text-xs uppercase text-[#ffb4a8] tracking-widest flex items-center gap-1.5">
-                      Inspect Stippling & Micro-Detail <ArrowRight className="w-3.5 h-3.5" />
+                      {art.isSold ? 'View Archival Dossier (Sold Out)' : 'Inspect Stippling & Micro-Detail'} <ArrowRight className="w-3.5 h-3.5" />
                     </span>
                   </div>
                 </div>
@@ -444,9 +451,23 @@ export default function App() {
                     </span>
                   </div>
 
-                  <h3 className="font-editorial text-lg sm:text-xl text-[#e5e2e1] group-hover:text-[#ffb4a8] transition-colors">
-                    {art.title}
-                  </h3>
+                  <div className="flex items-baseline justify-between gap-2">
+                    <h3 className="font-editorial text-lg sm:text-xl text-[#e5e2e1] group-hover:text-[#ffb4a8] transition-colors">
+                      {art.title}
+                    </h3>
+                    {art.isSold && (
+                      <span className="shrink-0 font-mono-archive text-[10px] text-[#ffb4a8] bg-[#8b0000]/30 border border-[#8b0000] px-1.5 py-0.5 uppercase tracking-wider">
+                        Sold Out
+                      </span>
+                    )}
+                  </div>
+
+                  {art.isSold && (
+                    <div className="text-[11px] font-mono-archive text-[#ffb4a8] flex items-center gap-1.5 bg-[#251515] border border-[#8b0000]/40 px-2 py-1">
+                      <span className="w-1.5 h-1.5 rounded-full bg-[#ffb4a8]" />
+                      <span>Acquired by customer // Not available to buy</span>
+                    </div>
+                  )}
 
                   <p className="text-xs text-[#e3beb8]/80 line-clamp-2 font-body">
                     {art.caption}
